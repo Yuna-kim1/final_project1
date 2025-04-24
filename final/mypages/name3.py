@@ -36,7 +36,9 @@ def run():
 
     # 데이터 로드
     try:
-        df = pd.read_csv("oxidefilm_data.csv")
+        import os
+        df = pd.read_csv(os.path.join("final", "oxidefilm_data.csv"))
+
     except FileNotFoundError:
         st.error("⚠️ 'oxidefilm_data.csv' 파일이 없습니다.")
         return
