@@ -207,18 +207,14 @@ else:
                 """, unsafe_allow_html=True)
                 
         # 하단 이미지 삽입 (중앙 정렬, 전체 너비)
-        st.markdown("<br>", unsafe_allow_html=True)
+        import os
         from PIL import Image
-        image = Image.open("image.png")
-        st.image(image, use_container_width=True)
-
-    else:
-        path = os.path.join("mypages", f"{page}.py")
-        if os.path.exists(path):
-            spec = importlib.util.spec_from_file_location("page_module", path)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-            module.run()
+        
+        img_path = os.path.join(os.path.dirname(__file__), "image.png")
+        
+        if os.path.exists(img_path):
+            image = Image.open(img_path)
+            st.image(image, use_container_width=True)
         else:
-            st.error(f"❌ '{page}.py' 파일을 찾을 수 없습니다.")
+            st.error("image.png 파일을 찾을 수 없습니다.")
 
