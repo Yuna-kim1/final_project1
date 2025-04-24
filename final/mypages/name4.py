@@ -89,6 +89,7 @@ def run():
 
     xbar_vals = []
     r_vals = []
+    all_warnings = []
 
     for i in range(total_groups):
         xbar_vals.append(xbar_list[i])
@@ -135,6 +136,8 @@ def run():
             if all((x > zone_B_upper or x < zone_B_lower) for x in last8):
                 warnings.append(f"[{x_labels[i]}] Rule 8: 8점 연속 1σ 바깥 분포입니다.")
 
+        all_warnings.extend(warnings)
+
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
 
         ax1.plot(x_labels[:i+1], xbar_vals, marker='o', color='blue', label='X-bar')
@@ -160,8 +163,18 @@ def run():
         placeholder.pyplot(fig)
         plt.close(fig)
 
-        for msg in warnings:
-            st.warning(msg)
+        # --- 최근 경고 5개는 경고창으로, 전체는 스크롤 영역 ---
+        if warnings:
+            for msg in warnings[-5:]:
+                st.warning(msg)
+
+            with st.expander("📋 전체 경고 보기", expanded=True):
+                st.markdown(
+                    "<div style='max-height: 150px; overflow-y: auto;'>"
+                    + "".join(f"<p>⚠️ {w}</p>" for w in all_warnings)
+                    + "</div>",
+                    unsafe_allow_html=True
+                )
 
         time.sleep(0.5)
 
