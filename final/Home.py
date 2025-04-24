@@ -151,12 +151,15 @@ else:
         st.write("아래에 버튼을 클릭하여 대시보드에 대한 정보를 확인할 수 있습니다.")
 
         col1, col2, col3 = st.columns(3)
-        if st.button("데이터 확인", key="c0"):
-            st.session_state.show_cluster = 0
-        if st.button("도금 두께 예측", key="c1"):
-            st.session_state.show_cluster = 1
-        if st.button("실시간 관리도", key="c2"):
-            st.session_state.show_cluster = 2
+        with col1:
+            if st.button("데이터 확인", key="c0"):
+                st.session_state.show_cluster = 0
+        with col2:
+            if st.button("도금 두께 예측", key="c1"):
+                st.session_state.show_cluster = 1
+        with col3:
+            if st.button("실시간 관리도", key="c2"):
+                st.session_state.show_cluster = 2
 
         if 'show_cluster' in st.session_state:
             cluster = st.session_state.show_cluster
