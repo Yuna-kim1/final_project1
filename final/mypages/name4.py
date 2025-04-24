@@ -33,6 +33,7 @@ def run():
 
     st.subheader("X bar-R 관리도")
 
+    import os
     df_train = pd.read_csv(os.path.join("final", "oxidefilm_data.csv"))
     X_train = df_train[['time', 'temperature', 'rectifier', 'power']]
     y_train = df_train['mean_um']
