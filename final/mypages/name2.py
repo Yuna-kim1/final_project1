@@ -103,9 +103,8 @@ def run():
 
     try:
         import os
-        base_dir = os.path.dirname(__file__)
-        file_path = os.path.join(base_dir, "final", "oxidefilm_data.csv")
-        df = pd.read_csv(file_path)
+        df = pd.read_csv(os.path.join("final", "oxidefilm_data.csv"))
+    
 
     except FileNotFoundError:
         st.error("⚠️ 'oxidefilm_data.csv' 파일을 찾을 수 없습니다.")
