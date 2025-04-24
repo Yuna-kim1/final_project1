@@ -210,25 +210,26 @@ else:
         import os
         import importlib.util
         from PIL import Image
-        
-        # 하단 이미지 삽입 (중앙 정렬, 전체 너비)
-        # 하단 이미지 삽입 (중앙 정렬, 전체 너비)
+
         st.markdown("<br>", unsafe_allow_html=True)
         from PIL import Image
         import os
+        import importlib.util
 
-        img_path = os.path.join(os.path.dirname(__file__), "image.png")
+        base_dir = os.path.dirname(__file__)
+        img_path = os.path.join(base_dir, "image.png")
         image = Image.open(img_path)
         st.image(image, use_container_width=True)
 
     else:
-        path = os.path.join("mypages", f"{page}.py")
-        if os.path.exists(path):
-            spec = importlib.util.spec_from_file_location("page_module", path)
+        page_path = os.path.join(base_dir, "mypages", f"{page}.py")
+        if os.path.exists(page_path):
+            spec = importlib.util.spec_from_file_location("page_module", page_path)
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
             module.run()
         else:
             st.error(f"❌ '{page}.py' 파일을 찾을 수 없습니다.")
+
 
 
