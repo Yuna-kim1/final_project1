@@ -223,12 +223,12 @@ else:
         # 페이지 파일 불러오기
         page = st.session_state.get("current_page", "default")
         
-        path = os.path.join("mypages", f"{page}.py")
-        if os.path.exists(path):
-            spec = importlib.util.spec_from_file_location("page_module", path)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-            module.run()
-        else:
-            st.error(f"❌ '{page}.py' 파일을 찾을 수 없습니다.")
+    path = os.path.join("mypages", f"{page}.py")
+    if os.path.exists(path):
+        spec = importlib.util.spec_from_file_location("page_module", path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        module.run()
+    else:
+        st.error(f"❌ '{page}.py' 파일을 찾을 수 없습니다.")
 
