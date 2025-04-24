@@ -30,7 +30,7 @@ def run():
     """, unsafe_allow_html=True)
 
     st.subheader("X-bar & R 관리도")
-    st.write("8가지의 Rule에 벗어나면 아래 경고 메세지에서 확인할 수 있습니다.")
+    st.write("8가지의 Rule에 벗어나면 아래에 경고 문구가 나타납니다.")
 
     # 데이터 & 모델
     df_train = pd.read_csv(os.path.join("final", "oxidefilm_data.csv"))
