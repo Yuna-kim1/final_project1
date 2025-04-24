@@ -56,7 +56,7 @@ def run():
     selected_var = st.selectbox("관리도를 그릴 변수를 선택하세요:", available_vars)
 
     # --- subgroup 설정 및 X-bar/R 계산 ---
-    n = 4  # subgroup size
+    n = 4
     total_groups = len(df_new) // n
     subgroups = np.array_split(df_new[selected_var][:total_groups * n], total_groups)
 
@@ -69,23 +69,18 @@ def run():
     xbar_bar  = np.mean(xbar_base)
     r_bar     = np.mean(r_base)
 
-    # A2, D3, D4 값 (n=4)
     A2, D3, D4 = 0.729, 0.0, 2.282
     UCL_xbar = xbar_bar + A2 * r_bar
     LCL_xbar = xbar_bar - A2 * r_bar
     UCL_r    = D4 * r_bar
     LCL_r    = D3 * r_bar
 
-    # --- Nelson 규칙용 σ 및 zone 계산 ---
-    # d2 (n=4) = 2.059
     d2 = 2.059
     sigma_est = r_bar / d2
-
     zone_A_upper = xbar_bar + 2 * sigma_est
     zone_A_lower = xbar_bar - 2 * sigma_est
     zone_B_upper = xbar_bar + sigma_est
     zone_B_lower = xbar_bar - sigma_est
-    # zone_C는 ±1σ 이내
     zone_C_upper = zone_B_upper
     zone_C_lower = zone_B_lower
 
@@ -93,33 +88,25 @@ def run():
     placeholder = st.empty()
 
     xbar_vals = []
-    r_vals    = []
+    r_vals = []
 
-    # --- 그룹별 실시간 업데이트 및 이상 탐지 ---
     for i in range(total_groups):
         xbar_vals.append(xbar_list[i])
         r_vals.append(r_list[i])
 
         warnings = []
 
-        # Rule 1: UCL/LCL 벗어남
         if xbar_list[i] > UCL_xbar or xbar_list[i] < LCL_xbar:
-            warnings.append("Rule 1: 한 점이 관리 한계를 벗어났습니다.")
-
-        # Rule 2: 같은 방향 9점 연속
+            warnings.append(f"[{x_labels[i]}] Rule 1: 한 점이 관리 한계를 벗어났습니다.")
         if len(xbar_vals) >= 9:
             last9 = xbar_vals[-9:]
             if all(x > xbar_bar for x in last9) or all(x < xbar_bar for x in last9):
-                warnings.append("Rule 2: 중심선으로부터 같은 방향 9점 연속입니다.")
-
-        # Rule 3: 6점 연속 증가/감소
+                warnings.append(f"[{x_labels[i]}] Rule 2: 중심선으로부터 같은 방향 9점 연속입니다.")
         if len(xbar_vals) >= 6:
             last6 = xbar_vals[-6:]
             diffs = np.diff(last6)
             if all(diffs > 0) or all(diffs < 0):
-                warnings.append("Rule 3: 6점 연속 증가/감소 추세입니다.")
-
-        # Rule 4: 14점 교대로 위/아래
+                warnings.append(f"[{x_labels[i]}] Rule 3: 6점 연속 증가/감소 추세입니다.")
         if len(xbar_vals) >= 14:
             last14 = xbar_vals[-14:]
             alt = all(
@@ -128,38 +115,28 @@ def run():
                 for j in range(13)
             )
             if alt:
-                warnings.append("Rule 4: 14점 교대로 위/아래 분포입니다.")
-
-        # Rule 5: 3점 중 2점이 2σ 밖 같은 방향
+                warnings.append(f"[{x_labels[i]}] Rule 4: 14점 교대로 위/아래 분포입니다.")
         if len(xbar_vals) >= 3:
             last3 = xbar_vals[-3:]
             cnt = sum(1 for x in last3 if x > zone_A_upper or x < zone_A_lower)
             if cnt >= 2:
-                warnings.append("Rule 5: 3점 중 2점이 2σ 바깥 같은 방향입니다.")
-
-        # Rule 6: 5점 중 4점이 1σ 밖 같은 방향
+                warnings.append(f"[{x_labels[i]}] Rule 5: 3점 중 2점이 2σ 바깥 같은 방향입니다.")
         if len(xbar_vals) >= 5:
             last5 = xbar_vals[-5:]
             cnt = sum(1 for x in last5 if x > zone_B_upper or x < zone_B_lower)
             if cnt >= 4:
-                warnings.append("Rule 6: 5점 중 4점이 1σ 바깥 같은 방향입니다.")
-
-        # Rule 7: 15점 연속 1σ 이내
+                warnings.append(f"[{x_labels[i]}] Rule 6: 5점 중 4점이 1σ 바깥 같은 방향입니다.")
         if len(xbar_vals) >= 15:
             last15 = xbar_vals[-15:]
             if all(zone_C_lower <= x <= zone_C_upper for x in last15):
-                warnings.append("Rule 7: 15점 연속 1σ 이내 분포입니다.")
-
-        # Rule 8: 8점 연속 1σ 밖 (zone A 또는 B)
+                warnings.append(f"[{x_labels[i]}] Rule 7: 15점 연속 1σ 이내 분포입니다.")
         if len(xbar_vals) >= 8:
             last8 = xbar_vals[-8:]
             if all((x > zone_B_upper or x < zone_B_lower) for x in last8):
-                warnings.append("Rule 8: 8점 연속 1σ 바깥 분포입니다.")
+                warnings.append(f"[{x_labels[i]}] Rule 8: 8점 연속 1σ 바깥 분포입니다.")
 
-        # --- 관리도 그리기 ---
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
 
-        # X-bar 차트
         ax1.plot(x_labels[:i+1], xbar_vals, marker='o', color='blue', label='X-bar')
         ax1.axhline(UCL_xbar, color='red', linestyle='--', label='UCL')
         ax1.axhline(xbar_bar, color='green', linestyle='-', label='CL')
@@ -169,7 +146,6 @@ def run():
         ax1.legend()
         ax1.grid(True)
 
-        # R 차트
         ax2.plot(x_labels[:i+1], r_vals, marker='o', color='purple', label='R')
         ax2.axhline(UCL_r, color='red', linestyle='--', label='UCL')
         ax2.axhline(r_bar, color='green', linestyle='-', label='CL')
@@ -184,15 +160,15 @@ def run():
         placeholder.pyplot(fig)
         plt.close(fig)
 
-        # --- 이상 징후 표시 ---
         for msg in warnings:
             st.warning(msg)
 
-        time.sleep(0.5)  # 업데이트 속도 조절
+        time.sleep(0.5)
 
 # 앱 실행
 if __name__ == "__main__":
     run()
+
 
 
 
