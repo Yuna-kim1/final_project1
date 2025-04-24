@@ -1,11 +1,14 @@
 import streamlit as st
 import importlib.util
 import os
+from PIL import Image
+
+# 🔧 base_dir 전역 선언
+base_dir = os.path.dirname(__file__)
 
 # 페이지 상단에 넣어주세요
 st.markdown("""
     <style>
-    /* 본문 버튼 (사이드바 제외) 스타일 고정 */
     div.stButton > button[kind="secondary"]:not([data-testid="baseButton-secondarySidebar"]) {
         background-color: black !important;
         color: white !important;
@@ -33,20 +36,12 @@ if "page" not in st.session_state:
 
 # ✅ 로그인 화면
 if not st.session_state.authenticated:
-    # --- 다크모드 스타일 추가 ---
+    # 다크모드 스타일
     st.markdown("""
         <style>
-            .stApp {
-                background-color: #121212;
-                color: #FFFFFF;
-            }
-            .stTextInput > div > div > input {
-                background-color: #1e1e1e !important;
-                color: #FFFFFF !important;
-            }
-            .stTextInput label, .stPasswordInput label {
-                color: #CCCCCC;
-            }
+            .stApp { background-color: #121212; color: #FFFFFF; }
+            .stTextInput > div > div > input { background-color: #1e1e1e !important; color: #FFFFFF !important; }
+            .stTextInput label, .stPasswordInput label { color: #CCCCCC; }
             .stButton > button {
                 background-color: #333333;
                 color: white;
@@ -59,17 +54,13 @@ if not st.session_state.authenticated:
     """, unsafe_allow_html=True)
 
     st.title("🔐 로그인")
-
-    # --- 텍스트 메시지 ---
     st.markdown("<strong>양산산화 도금공정</strong> 대시보드입니다.", unsafe_allow_html=True)
-
     st.markdown("""
         <div style='margin-top: 10px; margin-bottom: 20px; padding: 10px; background-color: #2a2a2a; color: #ddd; border-left: 6px solid #4a90e2; border-radius: 6px;'>
             로그인 후 상세 기능을 확인하실 수 있습니다.
         </div>
     """, unsafe_allow_html=True)
 
-    # --- 로그인 입력창 ---
     username = st.text_input("아이디")
     password = st.text_input("비밀번호", type="password")
     if st.button("로그인"):
@@ -79,9 +70,9 @@ if not st.session_state.authenticated:
         else:
             st.error("아이디 또는 비밀번호가 올바르지 않습니다.")
 
-# ✅ 로그인 성공 시 대시보드 메인 진입
+# ✅ 로그인 성공 시
 else:
-    # --- 🔧 사이드바 커스터마이징 ---
+    # 사이드바 커스터마이징
     st.markdown("""
         <style>
             [data-testid="stSidebar"] {
@@ -115,7 +106,7 @@ else:
         </style>
     """, unsafe_allow_html=True)
 
-    # --- ✅ 메뉴 구성 ---
+    # 메뉴 항목
     menu_items = {
         "Home": "🏠Home",
         "name2": "데이터 확인",
@@ -124,8 +115,7 @@ else:
     }
 
     for key, label in menu_items.items():
-        button_clicked = st.sidebar.button(label, key=key)
-        if button_clicked:
+        if st.sidebar.button(label, key=key):
             st.session_state.page = key
 
     st.sidebar.markdown(f"""
@@ -141,7 +131,7 @@ else:
         </script>
     """, unsafe_allow_html=True)
 
-    # --- ✅ 페이지 로드 ---
+    # 메인 페이지
     page = st.session_state.page
 
     if page == "Home":
@@ -161,15 +151,12 @@ else:
         st.write("아래에 버튼을 클릭하여 대시보드에 대한 정보를 확인할 수 있습니다.")
 
         col1, col2, col3 = st.columns(3)
-        with col1:
-            if st.button("데이터 확인", key="c0"):
-                st.session_state.show_cluster = 0
-        with col2:
-            if st.button("도금 두께 예측", key="c1"):
-                st.session_state.show_cluster = 1
-        with col3:
-            if st.button("실시간 관리도", key="c2"):
-                st.session_state.show_cluster = 2
+        if st.button("데이터 확인", key="c0"):
+            st.session_state.show_cluster = 0
+        if st.button("도금 두께 예측", key="c1"):
+            st.session_state.show_cluster = 1
+        if st.button("실시간 관리도", key="c2"):
+            st.session_state.show_cluster = 2
 
         if 'show_cluster' in st.session_state:
             cluster = st.session_state.show_cluster
@@ -205,23 +192,18 @@ else:
                     </ul>
                 </div>
                 """, unsafe_allow_html=True)
-                
-        # 하단 이미지 삽입 (중앙 정렬, 전체 너비)
-        import os
-        import importlib.util
-        from PIL import Image
 
+        # 이미지 삽입
         st.markdown("<br>", unsafe_allow_html=True)
-        from PIL import Image
-        import os
-        import importlib.util
-
-        base_dir = os.path.dirname(__file__)
         img_path = os.path.join(base_dir, "image.png")
-        image = Image.open(img_path)
-        st.image(image, use_container_width=True)
+        if os.path.exists(img_path):
+            image = Image.open(img_path)
+            st.image(image, use_container_width=True)
+        else:
+            st.warning("image.png 파일을 찾을 수 없습니다.")
 
     else:
+        # 다른 페이지 불러오기
         page_path = os.path.join(base_dir, "mypages", f"{page}.py")
         if os.path.exists(page_path):
             spec = importlib.util.spec_from_file_location("page_module", page_path)
