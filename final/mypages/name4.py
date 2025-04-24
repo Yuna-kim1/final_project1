@@ -33,7 +33,7 @@ def run():
 
     st.subheader("X bar-R 관리도")
 
-    df_train = pd.read_csv("oxidefilm_data.csv")
+    df_train = pd.read_csv(os.path.join("final", "oxidefilm_data.csv"))
     X_train = df_train[['time', 'temperature', 'rectifier', 'power']]
     y_train = df_train['mean_um']
     model = XGBRegressor(random_state=42)
